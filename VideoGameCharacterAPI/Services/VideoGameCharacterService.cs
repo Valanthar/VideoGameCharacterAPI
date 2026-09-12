@@ -1,36 +1,46 @@
-﻿using VideoGameCharacterAPI.Models;
+﻿using Microsoft.EntityFrameworkCore;    
+using ModelContextProtocol.Protocol;
+using VideoGameCharacterAPI.Data;
+using VideoGameCharacterAPI.DTOs;
+using VideoGameCharacterAPI.Models;
 
 namespace VideoGameCharacterAPI.Services
 {
-    public class VideoGameCharacterService : IVideoGameCharacterService
+    public class VideoGameCharacterService(AppDbContext context) : IVideoGameCharacterService
     {
-        static List<Character> characters = new List<Character>
-        {
-            new Character { Id = 1, Name = "Mario", Game = "Super Mario Bros.", Role = "Plumber" },
-            new Character { Id = 2, Name = "Soap", Game = "Call of Duty", Role = "Private" },
-            new Character { Id = 3, Name = "Bowser", Game = "Super Mario Bros.", Role = "Villain" },
-            new Character { Id = 4, Name = "Illidan", Game = "World of Warcraft", Role = "Based" },
-        };
 
-        public Task<Character> AddCharacterAsync(Character character)
+        public Task<GetCharacterResponseDTO> AddCharacterAsync(Character character)
         {
             throw new NotImplementedException();
         }
 
         public Task<bool> DeleteCharacterAsync(int id)
-        {
+        { 
             throw new NotImplementedException();
         }
+        public async Task<List<GetCharacterResponseDTO>> GetAllCharacterAsync()
+    => await context.Characters.Select(c => new GetCharacterResponseDTO
+    {
+        Name = c.Name,
+        Game = c.Game,
+        Role = c.Role
+    }).ToListAsync();
 
-        public async Task<Character?> GetCharacterByIdAsync(int id)
+        public async Task<GetCharacterResponseDTO?> GetCharacterByIdAsync(int id)  
         {
-            var result = characters.FirstOrDefault(c => c.Id == id);
-            return await Task.FromResult(result);
-        }
-         
-        public async Task<List<Character>> GetCharactersAsync()
-        => await Task.FromResult(characters);
+            var result = await context.Characters
+                .Where(c => c.Id == id)
+                .Select(c => new GetCharacterResponseDTO
+                {
+                    Name = c.Name,
+                    Game = c.Game,
+                    Role = c.Role
+                })
+                .FirstOrDefaultAsync();
 
+            return result;
+        }
+      
         public Task<bool> UpdateCharacterAsync(int id, Character character)
         { 
             throw new NotImplementedException();
